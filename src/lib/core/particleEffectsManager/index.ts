@@ -15,16 +15,14 @@ import { MainThreadContext } from '@/lib/core/executionContexts/mainThreadContex
 const DEFAULT_SPAWN_FRAMESPAN = 10;
 
 export class ParticleEffectsManager {
-  private contextManager: ExecutionContextManager | undefined;
+  private contextManager: ExecutionContextManager;
   private renderer: MondlichRenderer;
   private effectsData: Map<ParticleEffect<never>, RenderData> = new Map<ParticleEffect<never>, RenderData>();
   readonly textureManager: TextureManager = new TextureManager();
 
-  constructor(private readonly adapter: EngineAdapter, workerScript?: string) {
+  constructor(private readonly adapter: EngineAdapter) {
     this.renderer = new MondlichRenderer(adapter);
-    if (workerScript) {
-      this.contextManager = new ExecutionContextManager(new WorkerManager(workerScript));
-    }
+    this.contextManager = new ExecutionContextManager(new WorkerManager());
   }
 
   addEffect(effect: ParticleEffect<never>, renderData: RenderData): void {
@@ -40,12 +38,12 @@ export class ParticleEffectsManager {
   }
 
   setWorkerEnabled(effect: ParticleEffect<never>, enabled: boolean): void {
-    this.contextManager?.setWorkerEnabled(effect, enabled);
+    this.contextManager.setWorkerEnabled(effect, enabled);
   }
 
   async update(): Promise<void> {
     const updates = Array.from(this.effectsData.keys()).map(effect => {
-      const context = this.contextManager?.getContext(effect) || new MainThreadContext();
+      const context = this.contextManager.getContext(effect) || new MainThreadContext();
       return effect.update(context);
     });
 

@@ -3,7 +3,6 @@ import { Timer } from '@/lib/utils';
 import { ParticlePool } from '@/lib/core/particlePool';
 import { Particle } from '@/lib/core/particle';
 import { MAX_FPS } from '@/lib/domain/constants';
-import { MainThreadContext } from '@/lib/core/executionContexts/mainThreadContext';
 import { ExecutionContext } from '@/lib/core/executionContexts/executionContext';
 
 type TSystemSettings<T> = T extends ParticleSystem<infer S> ? S : never;
@@ -61,10 +60,10 @@ export class ParticleEffect<T extends ParticleSystem> {
     }
   }
 
-  async update(context?: ExecutionContext): Promise<void> {
+  async update(context: ExecutionContext): Promise<void> {
     if (!this.timer.isRunning) return Promise.resolve();
 
-    return (context || new MainThreadContext()).update(this);
+    return context.update(this);
   }
 
   // TODO: вынести в функцию и переиспользовать в скрипте воркера

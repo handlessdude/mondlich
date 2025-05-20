@@ -2,11 +2,13 @@ import { WorkerWrapper } from './domain/workerWrapper';
 
 export class WorkerManager {
   private workers: WorkerWrapper[] = [];
-  private workerScript: string;
+  private workerScriptUrl: URL;
 
-  constructor(workerScript: string, poolSize: number = navigator.hardwareConcurrency || 4) {
-    this.workerScript = workerScript;
-    this.workers = Array.from({ length: poolSize }, () => new WorkerWrapper(workerScript));
+  constructor(poolSize: number = navigator.hardwareConcurrency || 4) {
+    this.workerScriptUrl = new URL('./worker.js', import.meta.url);
+    this.workers = Array.from(
+      { length: poolSize }, () => new WorkerWrapper(this.workerScriptUrl),
+    );
   }
 
   getLeastBusyWorker(): WorkerWrapper {
